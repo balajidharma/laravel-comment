@@ -1,10 +1,10 @@
 <?php
 
-namespace Balajidharma\LaravelComment\Models;
+namespace BalajiDharma\LaravelComment\Models;
 
-use Balajidharma\LaravelComment\Events\CommentCreated;
-use Balajidharma\LaravelComment\Events\CommentDeleted;
-use Balajidharma\LaravelComment\Events\CommentUpdated;
+use BalajiDharma\LaravelComment\Events\CommentCreated;
+use BalajiDharma\LaravelComment\Events\CommentDeleted;
+use BalajiDharma\LaravelComment\Events\CommentUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

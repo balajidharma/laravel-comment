@@ -1,6 +1,6 @@
 <?php
 
-namespace Balajidharma\LaravelComment\Traits;
+namespace BalajiDharma\LaravelComment\Traits;
 
 use Illuminate\Support\Facades\Config;
 
