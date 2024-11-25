@@ -2,6 +2,9 @@
 
 namespace Balajidharma\LaravelComment\Models;
 
+use Balajidharma\LaravelComment\Events\CommentCreated;
+use Balajidharma\LaravelComment\Events\CommentDeleted;
+use Balajidharma\LaravelComment\Events\CommentUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,6 +23,26 @@ class Comment extends Model
         'status',
         'updated_at',
         'created_at',
+    ];
+
+    /**
+     * The event map for the model.
+     *
+     * @var array
+     */
+    protected $dispatchesEvents = [
+        'created' => CommentCreated::class,
+        'updated' => CommentUpdated::class,
+        'deleted' => CommentDeleted::class,
+    ];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = [
+        'commenter'
     ];
 
     /**
