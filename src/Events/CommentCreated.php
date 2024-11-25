@@ -1,11 +1,10 @@
 <?php
 
-namespace Balajidharma\LaravelComment\Events;
+namespace BalajiDharma\LaravelComment\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
-use Balajidharma\LaravelComment\Models\Comment;
 
 class CommentCreated
 {
@@ -18,7 +17,7 @@ class CommentCreated
      *
      * @return void
      */
-    public function __construct(Comment $comment)
+    public function __construct($comment)
     {
         $this->comment = $comment;
     }

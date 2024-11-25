@@ -23,7 +23,7 @@ trait HasCommenter
      */
     public function approvedComments()
     {
-        return $this->morphMany(Config::get('comment.models.comment'), 'commenter')->where('status', Config::get('status.approved'));
+        return $this->morphMany(Config::get('comment.models.comment'), 'commenter')->where('status', Config::get('comment.status.approved'));
     }
 
     /**
@@ -31,7 +31,7 @@ trait HasCommenter
      */
     public function pendingComments()
     {
-        return $this->morphMany(Config::get('comment.models.comment'), 'commenter')->where('status', Config::get('status.pending'));
+        return $this->morphMany(Config::get('comment.models.comment'), 'commenter')->where('status', Config::get('comment.status.pending'));
     }
 
     /**
@@ -39,6 +39,6 @@ trait HasCommenter
      */
     public function rejectedComments()
     {
-        return $this->morphMany(Config::get('comment.models.comment'), 'commenter')->where('status', Config::get('status.rejected'));
+        return $this->morphMany(Config::get('comment.models.comment'), 'commenter')->where('status', Config::get('comment.status.rejected'));
     }
 }
