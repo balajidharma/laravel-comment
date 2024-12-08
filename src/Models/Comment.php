@@ -42,7 +42,7 @@ class Comment extends Model
      * @var array
      */
     protected $with = [
-        'commenter'
+        'commenter',
     ];
 
     /**
@@ -80,5 +80,4 @@ class Comment extends Model
     {
         return $this->belongsTo(config('comment.models.comment'), 'parent_id');
     }
-
 }
