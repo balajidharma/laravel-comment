@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "illuminate/support": "^10.0|^11.0"
+        "illuminate/support": "^10.0|^11.0",
+        "spatie/laravel-activitylog":"^4.9"
     },
     "autoload": {
         "psr-4": {
