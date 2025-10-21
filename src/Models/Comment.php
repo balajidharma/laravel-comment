@@ -5,15 +5,14 @@ namespace BalajiDharma\LaravelComment\Models;
 use BalajiDharma\LaravelComment\Events\CommentCreated;
 use BalajiDharma\LaravelComment\Events\CommentDeleted;
 use BalajiDharma\LaravelComment\Events\CommentUpdated;
+use BalajiDharma\LaravelComment\Traits\HasLogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class Comment extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, HasLogsActivity, SoftDeletes;
 
     protected $fillable = [
         'commenter_type',
@@ -46,15 +45,6 @@ class Comment extends Model
     protected $with = [
         'commenter',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['content', 'status'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn (string $eventName) => "Comment has been {$eventName}");
-    }
 
     /**
      * The user who posted the comment.
