@@ -41,7 +41,7 @@ trait HasComments
     /**
      * Get user model.
      */
-    private function getUser($user = null)
+    private function getCommentUser($user = null)
     {
         if (! $user && auth()->check()) {
             return auth()->user();
@@ -58,14 +58,14 @@ trait HasComments
      * Add a comment as the currently authenticated user.
      *
      * @param  string   $content
-     * @param  Model|null $user
      * @param  int|null $parentId
      * @param  int|null $replyToId
+     * @param  Model|null $user
      * @return Model
      */
-    public function comment(string $content, $user = null, ?int $parentId = null, ?int $replyToId = null): Model
+    public function comment(string $content, ?int $parentId = null, ?int $replyToId = null, $user = null): Model
     {
-        $user = $this->getUser($user);
+        $user = $this->getCommentUser($user);
 
         return $this->comments()->create([
             'content'          => $content,
