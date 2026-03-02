@@ -21,6 +21,7 @@ class Comment extends Model
         'commentable_type',
         'content',
         'parent_id',
+        'reply_to_id',
         'status',
         'updated_at',
         'created_at',
@@ -63,13 +64,20 @@ class Comment extends Model
     }
 
     /**
-     * Get children of current comment.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * The specific comment this reply is directed at (for @mention).
+     * Always null on root comments.
+     */
+    public function replyTo()
+    {
+        return $this->belongsTo(config('comment.models.comment'), 'reply_to_id');
+    }
+
+    /**
+     * All flat replies under this root comment (any depth stored flat).
      */
     public function children()
     {
-        return $this->hasMany(config('comment.models.comment'), 'parent_id');
+        return $this->hasMany(config('comment.models.comment'), 'parent_id')->with('commenter', 'replyTo.commenter')->oldest();
     }
 
     /**

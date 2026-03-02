@@ -5,6 +5,7 @@ namespace BalajiDharma\LaravelComment\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Config;
+use BalajiDharma\LaravelComment\Exceptions\CommentException;
 
 trait HasComments
 {
@@ -38,37 +39,43 @@ trait HasComments
     }
 
     /**
-     * Add a comment as the currently authenticated user.
-     *
-     * @param  string   $content
-     * @param  int|null $parentId
-     * @return Model
+     * Get user model.
      */
-    public function comment(string $content, ?int $parentId = null): Model
+    private function getUser($user = null)
     {
-        return $this->commentAsUser(auth()->user(), $content, $parentId);
+        if (! $user && auth()->check()) {
+            return auth()->user();
+        }
+
+        if (! $user) {
+            throw CommentException::invalidUser();
+        }
+
+        return $user;
     }
 
     /**
-     * Add a comment as a specific user.
+     * Add a comment as the currently authenticated user.
      *
-     * @param  Model    $user
      * @param  string   $content
+     * @param  Model|null $user
      * @param  int|null $parentId
+     * @param  int|null $replyToId
      * @return Model
      */
-    public function commentAsUser(Model $user, string $content, ?int $parentId = null): Model
+    public function comment(string $content, $user = null, ?int $parentId = null, ?int $replyToId = null): Model
     {
-        $commentClass = Config::get('comment.models.comment');
+        $user = $this->getUser($user);
 
-        return $commentClass::create([
+        return $this->comments()->create([
             'content'          => $content,
             'commenter_type'   => $user->getMorphClass(),
             'commenter_id'     => $user->getKey(),
             'commentable_type' => $this->getMorphClass(),
             'commentable_id'   => $this->getKey(),
             'parent_id'        => $parentId,
-            'status'           => Config::get('comment.default_status', 1),
+            'reply_to_id'      => $replyToId,
+            'status'           => Config::get('comment.default_status', Config::get('comment.status.approved')),
         ]);
     }
 }
