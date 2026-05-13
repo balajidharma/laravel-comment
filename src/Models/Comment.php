@@ -1,14 +1,18 @@
 <?php
 
-namespace Balajidharma\LaravelComment\Models;
+namespace BalajiDharma\LaravelComment\Models;
 
+use BalajiDharma\LaravelComment\Events\CommentCreated;
+use BalajiDharma\LaravelComment\Events\CommentDeleted;
+use BalajiDharma\LaravelComment\Events\CommentUpdated;
+use BalajiDharma\LaravelComment\Traits\HasLogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasLogsActivity, SoftDeletes;
 
     protected $fillable = [
         'commenter_type',
@@ -17,9 +21,30 @@ class Comment extends Model
         'commentable_type',
         'content',
         'parent_id',
+        'reply_to_id',
         'status',
         'updated_at',
         'created_at',
+    ];
+
+    /**
+     * The event map for the model.
+     *
+     * @var array
+     */
+    protected $dispatchesEvents = [
+        'created' => CommentCreated::class,
+        'updated' => CommentUpdated::class,
+        'deleted' => CommentDeleted::class,
+    ];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = [
+        'commenter',
     ];
 
     /**
@@ -39,13 +64,20 @@ class Comment extends Model
     }
 
     /**
-     * Get children of current comment.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * The specific comment this reply is directed at (for @mention).
+     * Always null on root comments.
+     */
+    public function replyTo()
+    {
+        return $this->belongsTo(config('comment.models.comment'), 'reply_to_id');
+    }
+
+    /**
+     * All flat replies under this root comment (any depth stored flat).
      */
     public function children()
     {
-        return $this->hasMany(config('comment.models.comment'), 'parent_id');
+        return $this->hasMany(config('comment.models.comment'), 'parent_id')->with('commenter', 'replyTo.commenter')->oldest();
     }
 
     /**
@@ -57,5 +89,4 @@ class Comment extends Model
     {
         return $this->belongsTo(config('comment.models.comment'), 'parent_id');
     }
-
 }

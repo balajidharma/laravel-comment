@@ -16,5 +16,5 @@ return [
         'approved' => 1,
         'rejected' => 2,
         'spam' => 3,
-    ]
+    ],
 ];

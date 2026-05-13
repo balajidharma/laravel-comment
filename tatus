@@ -1,0 +1,105 @@
+[1mdiff --git a/src/Models/Comment.php b/src/Models/Comment.php[m
+[1mindex 7c32812..297da6e 100644[m
+[1m--- a/src/Models/Comment.php[m
+[1m+++ b/src/Models/Comment.php[m
+[36m@@ -21,6 +21,7 @@[m [mclass Comment extends Model[m
+         'commentable_type',[m
+         'content',[m
+         'parent_id',[m
+[32m+[m[32m        'reply_to_id',[m
+         'status',[m
+         'updated_at',[m
+         'created_at',[m
+[36m@@ -63,13 +64,20 @@[m [mclass Comment extends Model[m
+     }[m
+ [m
+     /**[m
+[31m-     * Get children of current comment.[m
+[31m-     *[m
+[31m-     * @return \Illuminate\Database\Eloquent\Relations\HasMany[m
+[32m+[m[32m     * The specific comment this reply is directed at (for @mention).[m
+[32m+[m[32m     * Always null on root comments.[m
+[32m+[m[32m     */[m
+[32m+[m[32m    public function replyTo()[m
+[32m+[m[32m    {[m
+[32m+[m[32m        return $this->belongsTo(config('comment.models.comment'), 'reply_to_id');[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * All flat replies under this root comment (any depth stored flat).[m
+      */[m
+     public function children()[m
+     {[m
+[31m-        return $this->hasMany(config('comment.models.comment'), 'parent_id');[m
+[32m+[m[32m        return $this->hasMany(config('comment.models.comment'), 'parent_id')->with('commenter', 'replyTo.commenter')->oldest();[m
+     }[m
+ [m
+     /**[m
+[1mdiff --git a/src/Traits/HasComments.php b/src/Traits/HasComments.php[m
+[1mindex 6195e82..15e5d99 100644[m
+[1m--- a/src/Traits/HasComments.php[m
+[1m+++ b/src/Traits/HasComments.php[m
+[36m@@ -5,6 +5,7 @@[m [mnamespace BalajiDharma\LaravelComment\Traits;[m
+ use Illuminate\Database\Eloquent\Model;[m
+ use Illuminate\Database\Eloquent\Relations\MorphMany;[m
+ use Illuminate\Support\Facades\Config;[m
+[32m+[m[32muse BalajiDharma\LaravelComment\Exceptions\CommentException;[m
+ [m
+ trait HasComments[m
+ {[m
+[36m@@ -38,37 +39,42 @@[m [mtrait HasComments[m
+     }[m
+ [m
+     /**[m
+[31m-     * Add a comment as the currently authenticated user.[m
+[31m-     *[m
+[31m-     * @param  string   $content[m
+[31m-     * @param  int|null $parentId[m
+[31m-     * @return Model[m
+[32m+[m[32m     * Get user model.[m
+      */[m
+[31m-    public function comment(string $content, ?int $parentId = null): Model[m
+[32m+[m[32m    private function getUser($user = null)[m
+     {[m
+[31m-        return $this->commentAsUser(auth()->user(), $content, $parentId);[m
+[32m+[m[32m        if (! $user && auth()->check()) {[m
+[32m+[m[32m            return auth()->user();[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if (! $user) {[m
+[32m+[m[32m            throw CommentException::invalidUser();[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        return $user;[m
+     }[m
+ [m
+     /**[m
+[31m-     * Add a comment as a specific user.[m
+[32m+[m[32m     * Add a comment as the currently authenticated user.[m
+      *[m
+[31m-     * @param  Model    $user[m
+      * @param  string   $content[m
+      * @param  int|null $parentId[m
+[32m+[m[32m     * @param  int|null $replyToId[m
+      * @return Model[m
+      */[m
+[31m-    public function commentAsUser(Model $user, string $content, ?int $parentId = null): Model[m
+[32m+[m[32m    public function comment(string $content, $user = null, ?int $parentId = null, ?int $replyToId = null): Model[m
+     {[m
+[31m-        $commentClass = Config::get('comment.models.comment');[m
+[32m+[m[32m        $user = $this->getUser($user);[m
+ [m
+[31m-        return $commentClass::create([[m
+[32m+[m[32m        return $this->comments()->create([[m
+             'content'          => $content,[m
+             'commenter_type'   => $user->getMorphClass(),[m
+             'commenter_id'     => $user->getKey(),[m
+             'commentable_type' => $this->getMorphClass(),[m
+             'commentable_id'   => $this->getKey(),[m
+             'parent_id'        => $parentId,[m
+[31m-            'status'           => Config::get('comment.default_status', 1),[m
+[32m+[m[32m            'reply_to_id'      => $replyToId,[m
+[32m+[m[32m            'status'           => Config::get('comment.default_status', Config::get('comment.status.approved')),[m
+         ]);[m
+     }[m
+ }[m

@@ -35,6 +35,10 @@ class CommentServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../database/migrations/create_comment_tables.php.stub' => $this->getMigrationFileName('create_comment_tables.php'),
             ], ['migrations', 'comment-migrations', 'comments-migrations', 'admin-core', 'admin-core-migrations']);
+
+            $this->publishes([
+                __DIR__.'/../database/migrations/add_reply_to_id_column_to_comment_table.php.stub' => $this->getMigrationFileName('add_reply_to_id_column_to_comment_table.php'),
+            ], ['migrations', 'comment-migrations', 'comments-migrations', 'admin-core', 'admin-core-migrations']);
         }
     }
 
